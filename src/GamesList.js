@@ -30,9 +30,10 @@ export default class GamesList extends Component {
     let row = [];
     for (let game = start; game < start + rowsize; game++) {
         if (game < this.state.games.length) {
+            let gameInfo = this.state.games[game].game;
             row.push( 
                 <div element="game" key={game}>
-                    {this.state.games[game].game.name}
+                    <a href={gameInfo.url} target="_blank">{gameInfo.name}</a>
                 </div>
             );   
         }         
