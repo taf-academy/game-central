@@ -1,5 +1,21 @@
 import React, {Component} from 'react';
+import {GridList, GridTile} from 'material-ui/GridList';
+import IconButton from 'material-ui/IconButton';
+import Subheader from 'material-ui/Subheader';
+import StarBorder from 'material-ui/svg-icons/toggle/star-border';
 
+const styles = {
+    root: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'space-around',
+    },
+    gridList: {
+      width: 900,
+      height: 900,
+      overflowY: 'auto',
+    },
+  };
 
 export default class GamesList extends Component {
 
@@ -16,24 +32,42 @@ export default class GamesList extends Component {
         return response.json();
       })
       .then(function(jsonData) {
-          self.setState({
-            games: jsonData
-          });
+        let gameData = self.getGameData(jsonData);
+        self.setState({
+            games: gameData
+        });
       });
   }
   
   componentWillUnmount() {
 
   }
+
+  getGameData(jsonData) {
+    let gameData = [];
+    for (var i = 0; i < jsonData.length; i++) {
+        let gameInfo = jsonData[i].game;
+        let game = {
+            id: gameInfo.id,
+            name: gameInfo.name,
+            url: gameInfo.url,
+            thumb: gameInfo.cover.url,
+            img: gameInfo.cover.url.replace("t_thumb", "t_1080p")
+        }
+        gameData.push(game)
+    }
+    return gameData;
+  }
   
   getGameRow(start, rowsize) {
     let row = [];
     for (let game = start; game < start + rowsize; game++) {
         if (game < this.state.games.length) {
-            let gameInfo = this.state.games[game].game;
+            let gameInfo = this.state.games[game];
             row.push( 
                 <div element="game" key={game}>
                     <a href={gameInfo.url} target="_blank">{gameInfo.name}</a>
+                    <img src={gameInfo.img} width="200"/>
                 </div>
             );   
         }         
@@ -43,7 +77,13 @@ export default class GamesList extends Component {
         <div className="row" key={rowid}>{row}</div>
     );
   }
+
+  handleClick(data) {
+        window.open(data, "_blank");
+  }
+
   render() {
+      
     let rowsize = 3;
     let gameslist = [];
 
@@ -51,10 +91,24 @@ export default class GamesList extends Component {
         gameslist.push(this.getGameRow(game, rowsize));
     }
 
-    return (
-      <div className="gameslist">
-            {gameslist}
-      </div>
+    return (    
+
+        <div style={styles.root}>
+            <GridList cellHeight={180} style={styles.gridList} >
+            <Subheader>Games</Subheader>
+            {this.state.games.map((tile) => (
+                <GridTile
+                onClick={ (e) => {
+                    this.handleClick(tile.url)
+                }}
+                key={tile.img}
+                title={tile.name}
+                actionIcon={<IconButton><StarBorder color="white" /></IconButton>}>
+                <img src={tile.img} />
+                </GridTile>
+            ))}
+            </GridList>
+        </div>
     );
   }
 }
